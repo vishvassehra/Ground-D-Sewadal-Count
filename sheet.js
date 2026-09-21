@@ -45,67 +45,46 @@ function tableToCsv(html) {
     .join("\n");
 }
 
+const dataRows = (csv) =>
+  csv.split(/\r?\n/).slice(1).filter((l) => l.replace(/[",\s]/g, "") !== "").length;
+
 export default async function handler(req, res) {
   const bust = Date.now();
+  // live sources first: they read the sheet as it is now. The published copy is a
+  // snapshot Google refreshes every few minutes, so it can miss a row Zoho just wrote.
   const sources = [
-    {
-      name: "published-csv",
-      url: `https://docs.google.com/spreadsheets/d/e/${PUBLISH_ID}/pub?gid=${GID}&single=true&output=csv&r=${bust}`,
-    },
-    {
-      name: "gviz-csv",
-      url: `https://docs.google.com/spreadsheets/d/${DOC_ID}/gviz/tq?tqx=out:csv&gid=${GID}&r=${bust}`,
-    },
-    {
-      name: "export-csv",
-      url: `https://docs.google.com/spreadsheets/d/${DOC_ID}/export?format=csv&gid=${GID}&r=${bust}`,
-    },
-    {
-      name: "pubhtml",
-      url: `https://docs.google.com/spreadsheets/d/e/${PUBLISH_ID}/pubhtml?gid=${GID}&single=true&r=${bust}`,
-      html: true,
-    },
+    { name: "live-gviz",     url: `https://docs.google.com/spreadsheets/d/${DOC_ID}/gviz/tq?tqx=out:csv&gid=${GID}&r=${bust}` },
+    { name: "live-export",   url: `https://docs.google.com/spreadsheets/d/${DOC_ID}/export?format=csv&gid=${GID}&r=${bust}` },
+    { name: "published-csv", url: `https://docs.google.com/spreadsheets/d/e/${PUBLISH_ID}/pub?gid=${GID}&single=true&output=csv&r=${bust}` },
+    { name: "published-html",url: `https://docs.google.com/spreadsheets/d/e/${PUBLISH_ID}/pubhtml?gid=${GID}&single=true&r=${bust}`, html: true },
   ];
 
   const tried = [];
   let best = null;
 
-  for (const s of sources) {
+  await Promise.all(sources.map(async (src, order) => {
     try {
-      const r = await fetch(s.url, { redirect: "follow", cache: "no-store" });
-      if (!r.ok) {
-        tried.push(`${s.name}:${r.status}`);
-        continue;
-      }
+      const r = await fetch(src.url, { redirect: "follow", cache: "no-store" });
+      if (!r.ok) { tried.push(`${src.name}:${r.status}`); return; }
       let body = await r.text();
-      if (s.html) body = tableToCsv(body);
-      else if (looksLikeHtml(body)) {
-        tried.push(`${s.name}:html`);
-        continue;
-      }
-      if (hasHeaders(body)) {
-        send(res, body, s.name, tried);
-        return;
-      }
-      tried.push(`${s.name}:no-headers`);
-      if (!best && body.trim()) best = { body, name: s.name };
+      if (src.html) body = tableToCsv(body);
+      else if (looksLikeHtml(body)) { tried.push(`${src.name}:login-page`); return; }
+      if (!hasHeaders(body)) { tried.push(`${src.name}:no-headers`); return; }
+      const rows = dataRows(body);
+      tried.push(`${src.name}:${rows} rows`);
+      // most rows wins; on a tie the earlier (live) source wins
+      if (!best || rows > best.rows || (rows === best.rows && order < best.order))
+        best = { body, rows, order, name: src.name };
     } catch (e) {
-      tried.push(`${s.name}:error`);
+      tried.push(`${src.name}:error`);
     }
-  }
+  }));
 
-  if (best) {
-    send(res, best.body, best.name, tried);
-    return;
-  }
-  res.setHeader("X-Sheet-Tried", tried.join(" | "));
-  res.status(502).send("No source returned usable sheet data");
-}
-
-function send(res, csv, source, tried) {
+  res.setHeader("X-Sheet-Tried", tried.join(" | ") || "none");
+  if (!best) { res.status(502).send("No source returned usable sheet data"); return; }
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
-  res.setHeader("X-Sheet-Source", source);
-  res.setHeader("X-Sheet-Tried", tried.join(" | ") || "none");
-  res.status(200).send(csv);
+  res.setHeader("X-Sheet-Source", best.name);
+  res.setHeader("X-Sheet-Rows", String(best.rows));
+  res.status(200).send(best.body);
 }

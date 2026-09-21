@@ -795,12 +795,14 @@ function diagnose(){
     <h2>No records read</h2><p>${why}</p>
     <div class="scroll"><table><tbody>
       <tr><td>Source</td><td style="text-align:left">${esc(state.source||'none')}</td></tr>
+      <tr><td>Server route</td><td style="text-align:left">${esc(state.api||'—')}${/404/.test(state.api)?' — the api folder is not deployed':''}</td></tr>
       <tr><td>Header row</td><td style="text-align:left">${head}</td></tr>
       <tr><td>Date read from</td><td style="text-align:left">${esc(state.dateFrom||'nothing')}</td></tr>
       <tr><td>Rows under header</td><td style="text-align:left">${n(state.dataRows)}</td></tr>
       <tr><td>First 160 chars</td><td style="text-align:left"><code style="font-size:12px;word-break:break-all">${esc(state.raw.slice(0,160))||'—'}</code></td></tr>
     </tbody></table></div>
-    <p class="note">If rows exist but are not here: File → Share → Publish to web in the <a href="${CONFIG.sheetUrl}" target="_blank" rel="noopener">Google Sheet</a>, publish the entire document, then Refresh. New entries go in through the <a href="${CONFIG.formUrl}" target="_blank" rel="noopener">entry / exit form</a>.</p>
+    <p class="note">A row just sent from the form can take a few minutes to reach Google's published copy. Setting the Google Sheet's General access to “Anyone with the link — Viewer” lets this page read it live instead.
+    If rows exist but are still not here: File → Share → Publish to web in the <a href="${CONFIG.sheetUrl}" target="_blank" rel="noopener">Google Sheet</a>, publish the entire document, then Refresh. New entries go in through the <a href="${CONFIG.formUrl}" target="_blank" rel="noopener">entry / exit form</a>.</p>
   </div>`;
 }
 
@@ -852,11 +854,12 @@ document.getElementById('print').onclick=()=>{
 async function load(){
   const src=document.getElementById('srcline');
   src.textContent='Reading the sheet…';
-  let text=null; state.source=''; state.raw='';
+  let text=null; state.source=''; state.raw=''; state.api='';
   try{
     const r=await fetch('/api/sheet?t='+Date.now(),{cache:'no-store'});
+    state.api = `HTTP ${r.status}` + (r.headers.get('X-Sheet-Tried') ? ' · '+r.headers.get('X-Sheet-Tried') : '');
     if(r.ok){ text=await r.text(); state.source=r.headers.get('X-Sheet-Source')||'api/sheet'; }
-  }catch(e){}
+  }catch(e){ state.api='not reachable'; }
   if(!text){
     try{
       const r=await fetch(DIRECT_CSV+'&t='+Date.now(),{cache:'no-store'});
