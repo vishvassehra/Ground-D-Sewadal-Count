@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#f3f1ec" />
-<title>Ground D — Adhikari and Sewadal entry/exit</title>
+<title>Ground D — Adhikari and Sewadal Present Count</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet">
@@ -144,6 +144,9 @@
   thead th[data-active=true]{color:var(--ink)}
   tbody tr:last-child td{border-bottom:0;font-weight:500}
   .tabcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:4px var(--pad)}
+  td.cm{color:var(--m)} td.cf{color:var(--f)}
+  table.kt td.tot{font-weight:600}
+  table.kt th{white-space:normal;line-height:1.25}
   svg{display:block;width:100%;height:auto;overflow:visible}
   .bars div{display:grid;grid-template-columns:1fr 1.4fr auto;gap:9px;align-items:center;margin:8px 0;font-size:13px}
   .bars .track{background:var(--hair);border-radius:4px;height:11px;display:flex;overflow:hidden}
@@ -172,33 +175,72 @@
 
   /* ---------- print / A4 ---------- */
   #printhead{display:none}
-  @page{size:A4 portrait;margin:13mm 11mm 14mm}
+  @page{
+    size:A4 portrait;margin:12mm 10mm 15mm;
+    @bottom-center{content:"Page " counter(page) " of " counter(pages);font:10pt "Inter Tight",Arial,sans-serif;color:#333}
+  }
   @media print{
     :root{--card:#fff;--paper:#fff}
     html,body{background:#fff}
-    body{font-size:10pt;color:#000}
+    body{font-size:12pt;color:#000;line-height:1.35}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .wrap{max-width:none;padding:0}
-    header,nav,.foot,.filterrow,.jump,.chev,.note,.links{display:none!important}
-    #printhead{display:block;margin-bottom:9mm;border-bottom:1.2pt solid #171f26;padding-bottom:4mm}
-    #printhead .ph-sam{font-size:8.5pt;letter-spacing:.03em;color:#8a6a2a;margin:0 0 1mm}
-    #printhead h1{font-family:"Newsreader",Georgia,serif;font-weight:400;font-size:19pt;margin:0 0 1.5mm;line-height:1.1}
-    #printhead .ph-line{display:flex;justify-content:space-between;gap:8mm;font-size:9pt;color:#3d474e}
-    #printhead .ph-tot{font-family:"Newsreader",serif;font-size:12pt;color:#000}
-    .hero{border:0;border-radius:0;padding:0 0 5mm;margin:0 0 5mm;border-bottom:.6pt solid #cfd4d6}
-    .total b{font-size:30pt}
-    .panel,.tabcard,.k{border:.6pt solid #c9ced1;border-radius:0;box-shadow:none;break-inside:avoid;page-break-inside:avoid}
-    .panel{padding:4mm;margin-bottom:4mm}
-    .k{margin-bottom:2.5mm}
+    header,nav,.foot,.filterrow,.jump,.chev,.note,.links,.split,.legend,.movement{display:none!important}
+
+    /* masthead */
+    #printhead{display:block;margin-bottom:4mm;border-bottom:2pt solid #000;padding-bottom:2.5mm}
+    #printhead .ph-sam{font-size:11pt;font-weight:600;color:#000;margin:0 0 1mm}
+    #printhead h1{font-family:"Inter Tight",Arial,sans-serif;font-weight:700;font-size:20pt;margin:0 0 2mm;line-height:1.15;color:#000}
+    #printhead .ph-line{display:flex;justify-content:space-between;align-items:baseline;gap:8mm;color:#000}
+    #printhead .ph-date{font-size:15pt;font-weight:700}
+    #printhead .ph-tot{font-size:17pt;font-weight:700}
+    #printhead .ph-meta{margin-top:1.5mm;font-size:10pt;color:#333}
+
+    /* summary: total + the four figures in the same order as the table */
+    .hero{border:0;border-radius:0;padding:0;margin:0 0 4mm}
+    .total{display:none}
+    .four{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:0;border:1.2pt solid #000}
+    .four div{border:0;border-right:1.2pt solid #000;border-radius:0;background:#fff;padding:1.8mm 3mm;text-align:center}
+    .four div:last-child{border-right:0}
+    .four div.adh{border-top:0;background:#f1f1f1}
+    .four span{font-size:11pt;font-weight:600;color:#000}
+    .four b,.four .m b,.four .f b{font-family:"Inter Tight",Arial,sans-serif;font-weight:700;font-size:22pt;color:#000}
+
+    /* tables: full grid, large bold figures, rows flow onto the next page with the heading repeated */
+    .panel,.tabcard{border:0;border-radius:0;box-shadow:none;padding:0;margin:0 0 5mm;break-inside:auto;page-break-inside:auto}
+    .panel h2{font-family:"Inter Tight",Arial,sans-serif;font-weight:700;font-size:14pt;color:#000}
+    .k{border:1pt solid #000;border-radius:0;break-inside:avoid;page-break-inside:avoid;margin-bottom:2.5mm}
     .cards{display:block}
     .k-body{display:block!important;background:#fff}
     .scroll{overflow:visible!important;margin:0;padding:0}
-    table{font-size:9pt;width:100%}
-    th,td{padding:1.6mm 2mm;border-bottom:.4pt solid #d7dcdd}
-    th:first-child,td:first-child{position:static;background:transparent}
+    table{width:100%;border-collapse:collapse;font-size:12pt;page-break-inside:auto}
     thead{display:table-header-group}
+    tfoot{display:table-footer-group}
     tr{break-inside:avoid;page-break-inside:avoid}
-    tbody tr:last-child td{border-top:.8pt solid #171f26}
+    th,td{border:1pt solid #000!important;padding:1.2mm 2.5mm;color:#000!important;white-space:normal}
+    th:first-child,td:first-child{position:static;background:transparent}
+    thead th{background:#e4e4e4!important;font-size:11.5pt;font-weight:700;text-align:center;vertical-align:bottom}
+    thead th:first-child{text-align:left}
+    tbody td{font-weight:700;font-size:13.5pt}
+    tbody td:first-child{font-size:13pt}
+    tbody tr:nth-child(even) td{background:#f5f5f5}
+    table.kt tbody tr td{background:#fff}
+    table.kt tbody tr.z td{background:#f3f3f3}
+    table.kt tbody.keep{break-inside:avoid;page-break-inside:avoid}
+    tbody tr:last-child td{border-top:1pt solid #000}
+    table.kt{table-layout:fixed}
+    table.kt th:first-child,table.kt td:first-child{width:31%}
+    table.kt th,table.kt td{text-align:center}
+    table.kt th:first-child,table.kt td:first-child{text-align:left}
+    table.kt thead th{font-size:12pt}
+    table.kt tbody td{font-size:15pt;font-weight:700!important;border-top:1pt solid #000!important}
+    table.kt tbody td:first-child{font-size:13.5pt}
+    table.kt td.tot,table.kt tr.grand td.tot{border-left:2.2pt solid #000!important}
+    table.kt td.tot{font-size:16pt!important;border-left:2pt solid #000!important}
+    table.kt thead th:last-child{border-left:2pt solid #000!important}
+    table.kt tr.grand td{background:#d9d9d9!important;font-weight:800!important;font-size:16pt!important;border-top:2.4pt solid #000!important}
+    table.kt tr.grand td:first-child{font-size:13.5pt!important}
+    table.kt tr.grand td.tot{font-size:18pt!important}
     svg{max-height:70mm}
     a[href]:after{content:""}
   }
@@ -212,7 +254,7 @@
     <div class="headrow">
       <div>
         <p class="samagam">79th Sant Nirankari Samagam</p>
-        <h1 class="place">Ground D — Adhikari and Sewadal entry/exit</h1>
+        <h1 class="place">Ground D — Adhikari and Sewadal Present Count</h1>
         <p class="links">
           <a href="" id="formLink" target="_blank" rel="noopener" class="lk primary">+ Entry / exit form</a>
           <a href="" id="sheetLink" target="_blank" rel="noopener" class="lk">Google Sheet ↗</a>
@@ -231,12 +273,12 @@
 
   <div id="printhead">
     <p class="ph-sam">79th Sant Nirankari Samagam</p>
-    <h1>Ground D — Adhikari and Sewadal entry/exit</h1>
+    <h1>Ground D — Adhikari and Sewadal Present Count</h1>
     <div class="ph-line">
-      <span id="phLeft"></span>
+      <span class="ph-date" id="phLeft"></span>
       <span class="ph-tot" id="phTotal"></span>
     </div>
-    <div class="ph-line" style="margin-top:1.5mm"><span id="phMeta"></span></div>
+    <div class="ph-line ph-meta"><span id="phMeta"></span></div>
   </div>
 
   <section class="hero">
@@ -247,10 +289,10 @@
       <div><span class="dot df"></span><b id="tF">—</b> all female <span id="pF"></span></div>
     </div>
     <div class="four">
-      <div class="adh m"><span>Adhikari male</span><b id="tAM">—</b></div>
-      <div class="m"><span>Males</span><b id="tRM">—</b></div>
-      <div class="adh f"><span>Adhikari female</span><b id="tAF">—</b></div>
-      <div class="f"><span>Females</span><b id="tRF">—</b></div>
+      <div class="adh m"><span>Adhikari Male</span><b id="tAM">—</b></div>
+      <div class="adh f"><span>Adhikari Female</span><b id="tAF">—</b></div>
+      <div class="m"><span>Male</span><b id="tRM">—</b></div>
+      <div class="f"><span>Female</span><b id="tRF">—</b></div>
     </div>
     <div class="movement" id="movement"></div>
   </section>
@@ -349,6 +391,16 @@ function strictDate(v){
   return parseDate(s);
 }
 // a numeric date with a first part over 12 proves day-first; a second part over 12 proves month-first
+// Google Sheets date serial: days since 30 Dec 1899 (46284 = 19 Sep 2026, 46287.77 = 22 Sep 2026 18:28).
+// Only used on columns found by header name, so a count like 48 can never become a date.
+function serialDate(v){
+  const s=String(v??'').trim();
+  if(!/^\d{5}(\.\d+)?$/.test(s)) return null;
+  const n=Math.floor(+s);
+  if(n<36526 || n>73050) return null;                // 1 Jan 2000 … 31 Dec 2099
+  const d=new Date(Date.UTC(1899,11,30)+n*86400000);
+  return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+}
 function detectDateOrder(rows,cols){
   let dmy=0, mdy=0;
   for(let r=1;r<rows.length;r++) for(const c of cols){
@@ -398,8 +450,8 @@ function buildRecords(rows){
   if(iF<0) iF=col(h=>/female|ladies|women/.test(h),adh);
   const iK=pick(head,'khetra'), iU=pick(head,'unit'), iS=pick(head,'status'),
         iC=pick(head,'count','total'), iT=pick(head,'timestamp','added time','submitted','created');
-  let iD=pick(head,'date');
-  if(iD>-1 && iD===iT) iD=-1;                       // "Timestamp" contains "date"? never use it as the date
+  let iD=pick(head,'date'); let dateNamed=iD>-1;
+  if(iD>-1 && iD===iT){ iD=-1; dateNamed=false; }   // "Timestamp" contains "date"? never use it as the date
   state.dateFrom='';
   if(iD<0){                                          // header renamed (e.g. "Column 5") — find it by content
     iD=findDateColumn(rows,[iT,iK,iU,iS,iM,iF,iAM,iAF,iC].filter(i=>i>-1));
@@ -425,7 +477,8 @@ function buildRecords(rows){
     const females = af + (iF>-1 ? num(row[iF]) : 0);
     const plain   = (iM<0 && iF<0 && iAM<0 && iAF<0 && iC>-1) ? num(row[iC]) : 0;   // older sheets with one Count column
     const total   = males+females+plain;
-    const dt = (iD>-1 ? strictDate(row[iD]) : null) || (iT>-1 ? parseDate(row[iT]) : null);
+    const dt = (iD>-1 ? (strictDate(row[iD]) || (dateNamed ? serialDate(row[iD]) : null)) : null)
+            || (iT>-1 ? (serialDate(row[iT]) || parseDate(row[iT])) : null);
     if(!dt || !status || !total){ bad++; continue; }
     recs.push({
       khetra: khetra || 'Not given',
@@ -516,13 +569,15 @@ const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 
 // [adhikari male, males, adhikari female, females] — m / f hold all males / females
 const four = x => [x.am||0, (x.m||0)-(x.am||0), x.af||0, (x.f||0)-(x.af||0)];
-const fourTds = x => { const [a,b,c2,d]=four(x);
-  return `<td style="color:var(--m)">${n(a)}</td><td style="color:var(--m)">${n(b)}</td>`+
-         `<td style="color:var(--f)">${n(c2)}</td><td style="color:var(--f)">${n(d)}</td>`; };
-const FOUR_TH = '<th>Adhikari M</th><th>Males</th><th>Adhikari F</th><th>Females</th>';
-const fourQty = x => { const [a,b,c2,d]=four(x);
-  return `<span class="qty"><span><em>AM</em><b>${n(a)}</b></span><span><em>M</em><b>${n(b)}</b></span>`+
-         `<span><em>AF</em><b>${n(c2)}</b></span><span><em>F</em><b>${n(d)}</b></span></span>`; };
+// on screen and paper the columns read: Adhikari Male, Adhikari Female, Male, Female
+// (the WhatsApp message keeps its own agreed order, four() above)
+const fourTds = x => { const [am,m,af,f]=four(x);
+  return `<td class="cm">${n(am)}</td><td class="cf">${n(af)}</td>`+
+         `<td class="cm">${n(m)}</td><td class="cf">${n(f)}</td>`; };
+const FOUR_TH = '<th>Adhikari Male</th><th>Adhikari Female</th><th>Male</th><th>Female</th>';
+const fourQty = x => { const [am,m,af,f]=four(x);
+  return `<span class="qty"><span><em>AM</em><b>${n(am)}</b></span><span><em>AF</em><b>${n(af)}</b></span>`+
+         `<span><em>M</em><b>${n(m)}</b></span><span><em>F</em><b>${n(f)}</b></span></span>`; };
 
 function render(){
   const c=compute(state.asOn);
@@ -548,11 +603,10 @@ function render(){
      <span><b>${n(c.liveKhetras)}</b> khetras · <b>${n(c.liveUnits)}</b> units</span>`;
 
   const tabName={board:'Khetra board',table:'Khetra table',gender:'Male and female split',trend:'Trend',log:'Movement log',msg:'Attendance message'}[state.tab];
-  document.getElementById('phLeft').textContent=`${tabName} · strength as on ${nice(state.asOn)}`;
-  document.getElementById('phTotal').textContent=
-    `${n(c.total)} sewadal · AM ${n(hAM)} · M ${n(hRM)} · AF ${n(hAF)} · F ${n(hRF)}`;
+  document.getElementById('phLeft').textContent=`Present as on ${nice(state.asOn)}`;
+  document.getElementById('phTotal').textContent=`Total present: ${n(c.total)}`;
   document.getElementById('phMeta').textContent=
-    `${n(c.liveKhetras)} khetras · ${n(c.liveUnits)} units · printed ${new Date().toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`;
+    `${tabName} · ${n(c.liveKhetras)} khetras · printed ${new Date().toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`;
 
   const view=document.getElementById('view');
   if(!state.recs.length){ view.innerHTML=diagnose(); return; }
@@ -593,7 +647,7 @@ function board(c){
       </summary>
       <div class="k-body">
         ${k.unitList.map(u=>`<div class="u">
-            <span>${esc(u.name)}<small>AM ${n(four(u)[0])} · M ${n(four(u)[1])} · AF ${n(four(u)[2])} · F ${n(four(u)[3])} · last ${shortd(u.last)}</small></span>
+            <span>${esc(u.name)}<small>AM ${n(four(u)[0])} · AF ${n(four(u)[2])} · M ${n(four(u)[1])} · F ${n(four(u)[3])} · last ${shortd(u.last)}</small></span>
             <span class="u-t">${n(u.total)}</span>
           </div>`).join('')}
         <div class="k-foot">
@@ -608,7 +662,10 @@ function board(c){
   return html+'</div><p class="note">Strength = entries minus exits up to '+nice(state.asOn)+'. Tap a khetra for its units.</p>';
 }
 
+let ktZebra=0;
+const ktRow = k => `<tr class="${(ktZebra++)%2?'z':''}"><td>${esc(k.name)}</td>${fourTds(k)}<td class="tot">${n(k.total)}</td></tr>`;
 function khetraTable(c){
+  ktZebra=0;
   const rows=c.khetras.map(k=>({...k, rm:k.m-k.am, rf:k.f-k.af}));
   const {key,dir}=state.sort;
   rows.sort((a,b)=>{
@@ -617,18 +674,12 @@ function khetraTable(c){
     return (va-vb)*dir;
   });
   const th=(k,l)=>`<th data-sort="${k}" data-active="${key===k}">${l}</th>`;
-  return `<div class="tabcard"><div class="scroll"><table>
-    <thead><tr>${th('name','Khetra')}${th('total','Total')}${th('am','Adhikari M')}${th('rm','Males')}
-      ${th('af','Adhikari F')}${th('rf','Females')}${th('arrived','In')}${th('departed','Out')}${th('last','Last')}</tr></thead>
-    <tbody>${rows.map(k=>`<tr>
-      <td>${esc(k.name)}</td><td>${n(k.total)}</td>
-      ${fourTds(k)}
-      <td class="in">${n(k.arrived)}</td><td class="out">${n(k.departed)}</td>
-      <td>${shortd(k.last)}</td></tr>`).join('')}
-      <tr><td>All khetras</td><td>${n(c.total)}</td>
-        ${fourTds(c)}
-        <td class="in">${n(c.arrived)}</td><td class="out">${n(c.departed)}</td>
-        <td>—</td></tr>
+  return `<div class="tabcard"><div class="scroll"><table class="kt">
+    <thead><tr>${th('name','Khetra')}${th('am','Adhikari Male')}${th('af','Adhikari Female')}
+      ${th('rm','Male')}${th('rf','Female')}${th('total','Total')}</tr></thead>
+    <tbody>${rows.slice(0,-1).map(k=>ktRow(k)).join('')}</tbody>
+    <tbody class="keep">${rows.slice(-1).map(k=>ktRow(k)).join('')}
+      <tr class="grand"><td>Total</td>${fourTds(c)}<td class="tot">${n(c.total)}</td></tr>
     </tbody></table></div></div>
     <p class="note">Tap a heading to sort.</p>`;
 }
@@ -790,7 +841,7 @@ function diagnose(){
   if(!state.raw)                why='Nothing came back from the sheet.';
   else if(state.missing.length) why=`Read the sheet, but these columns were not found: <b>${state.missing.join(', ')}</b>.`;
   else if(!state.dataRows)      why='Read the sheet and the columns are right, but there are no rows under the header yet.';
-  else                          why=`${n(state.dataRows)} row${state.dataRows===1?'':'s'} read, all skipped — a row needs a status, a date, and a male or female count.`;
+  else                          why=`${n(state.dataRows)} row${state.dataRows===1?'':'s'} read, all skipped — a row needs a status, a date this page can read, and a count above zero.`;
   return `<div class="panel">
     <h2>No records read</h2><p>${why}</p>
     <div class="scroll"><table><tbody>
